@@ -1,0 +1,994 @@
+
+> web@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 4.4s
+ ○ Compiling / ...
+ ✓ Compiled / in 3.4s (460 modules)
+ GET / 307 in 3665ms
+ ○ Compiling /executive ...
+ ✓ Compiled /executive in 27.3s (11429 modules)
+ GET /executive 200 in 27687ms
+ ○ Compiling /product ...
+ ✓ Compiled /product in 1184ms (11423 modules)
+ ○ Compiling /alerts ...
+ ✓ Compiled /alerts in 801ms (11431 modules)
+ ○ Compiling /analyst ...
+ ✓ Compiled /analyst in 1035ms (11429 modules)
+ ○ Compiling /operations ...
+ ✓ Compiled /operations in 837ms (11437 modules)
+ ○ Compiling /audit ...
+ ✓ Compiled /audit in 1053ms (11443 modules)
+ ○ Compiling /settings ...
+ ✓ Compiled /settings in 852ms (11449 modules)
+ ⨯ ./src/lib/mock-data.ts
+Error: 
+  [31mx[0m the name `regionValueMap` is defined multiple times
+     ,-[[36;1;4mC:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\src\lib\mock-data.ts[0m:88:1]
+ [2m 88[0m | // ─── Filter-aware Breakdown Generators ───────────────────────
+ [2m 89[0m | type FilterParams = { region?: string; platform?: string; tier?: string };
+ [2m 90[0m | 
+ [2m 91[0m | const regionValueMap: Record<string, string> = {
+     : [31;1m      ^^^^^^^|^^^^^^[0m
+     :              [31;1m`-- [31;1mprevious definition of `regionValueMap` here[0m[0m
+ [2m 92[0m |   na: "North America", eu: "Europe", apac: "Asia Pacific", latam: "Latin America", mea: "Middle East",
+ [2m 93[0m | };
+ [2m 94[0m | 
+ [2m 95[0m | const REGION_BASE: Record<string, number> = {
+ [2m 96[0m |   "North America": 520000, "Europe": 340000, "Asia Pacific": 245000,
+ [2m 97[0m |   "Latin America": 85000, "Middle East": 60000,
+ [2m 98[0m | };
+ [2m 99[0m | const PLATFORM_BASE: Record<string, number> = {
+ [2m100[0m |   "Web": 18500, "iOS": 12200, "Android": 6800, "Others": 900,
+ [2m101[0m | };
+ [2m102[0m | const TIER_BASE: Record<string, number> = {
+ [2m103[0m |   "Enterprise": 680000, "Pro": 385000, "Free": 185000,
+ [2m104[0m | };
+ [2m105[0m | 
+ [2m106[0m | export function generateRevenueByRegion(filters: FilterParams = {}): BreakdownItem[] {
+ [2m107[0m |   const platformScale = filters.platform && filters.platform !== "all"
+ [2m108[0m |     ? ({ web: 0.48, ios: 0.32, android: 0.18 }[filters.platform] ?? 1) : 1;
+ [2m109[0m |   const tierScale = filters.tier && filters.tier !== "all"
+ [2m110[0m |     ? ({ enterprise: 0.544, pro: 0.308, free: 0.148 }[filters.tier] ?? 1) : 1;
+ [2m111[0m | 
+ [2m112[0m |   const allRegions = Object.entries(REGION_BASE).map(([name, base]) => ({
+ [2m113[0m |     name, rawValue: Math.round(base * platformScale * tierScale),
+ [2m114[0m |   }));
+ [2m115[0m | 
+ [2m116[0m |   const activeRegionName = filters.region && filters.region !== "all"
+ [2m117[0m |     ? regionValueMap[filters.region] : null;
+ [2m118[0m |   const filtered = activeRegionName
+ [2m119[0m |     ? allRegions.filter((r) => r.name === activeRegionName) : allRegions;
+ [2m120[0m | 
+ [2m121[0m |   const total = filtered.reduce((s, r) => s + r.rawValue, 0);
+ [2m122[0m |   return filtered.map((r, i) => ({
+ [2m123[0m |     name: r.name, value: r.rawValue, color: CHART_COLORS[i % CHART_COLORS.length],
+ [2m124[0m |     percentage: total > 0 ? parseFloat(((r.rawValue / total) * 100).toFixed(1)) : 0,
+ [2m125[0m |   }));
+ [2m126[0m | }
+ [2m127[0m | 
+ [2m128[0m | export function generateRevenueByTier(filters: FilterParams = {}): BreakdownItem[] {
+ [2m129[0m |   const platformScale = filters.platform && filters.platform !== "all"
+ [2m130[0m |     ? ({ web: 0.48, ios: 0.32, android: 0.18 }[filters.platform] ?? 1) : 1;
+ [2m131[0m |   const regionScale = filters.region && filters.region !== "all"
+ [2m132[0m |     ? ({ na: 0.416, eu: 0.272, apac: 0.196, latam: 0.068, mea: 0.048 }[filters.region] ?? 1) : 1;
+ [2m133[0m | 
+ [2m134[0m |   const allTiers = Object.entries(TIER_BASE).map(([name, base]) => ({
+ [2m135[0m |     name, rawValue: Math.round(base * platformScale * regionScale),
+ [2m136[0m |   }));
+ [2m137[0m | 
+ [2m138[0m |   const filtered = filters.tier && filters.tier !== "all"
+ [2m139[0m |     ? allTiers.filter((t) => t.name.toLowerCase() === filters.tier) : allTiers;
+ [2m140[0m | 
+ [2m141[0m |   const total = filtered.reduce((s, t) => s + t.rawValue, 0);
+ [2m142[0m |   return filtered.map((t, i) => ({
+ [2m143[0m |     name: t.name, value: t.rawValue, color: CHART_COLORS[i % CHART_COLORS.length],
+ [2m144[0m |     percentage: total > 0 ? parseFloat(((t.rawValue / total) * 100).toFixed(1)) : 0,
+ [2m145[0m |   }));
+ [2m146[0m | }
+ [2m147[0m | 
+ [2m148[0m | export function generateTrafficByPlatform(filters: FilterParams = {}): BreakdownItem[] {
+ [2m149[0m |   const regionScale = filters.region && filters.region !== "all"
+ [2m150[0m |     ? ({ na: 1.3, eu: 1.05, apac: 0.85, latam: 0.55, mea: 0.42 }[filters.region] ?? 1) : 1;
+ [2m151[0m |   const tierScale = filters.tier && filters.tier !== "all"
+ [2m152[0m |     ? ({ enterprise: 1.4, pro: 1.0, free: 0.6 }[filters.tier] ?? 1) : 1;
+ [2m153[0m | 
+ [2m154[0m |   const allPlatforms = Object.entries(PLATFORM_BASE).map(([name, base]) => ({
+ [2m155[0m |     name, rawValue: Math.round(base * regionScale * tierScale),
+ [2m156[0m |   }));
+ [2m157[0m | 
+ [2m158[0m |   const filtered = filters.platform && filters.platform !== "all"
+ [2m159[0m |     ? allPlatforms.filter((p) =>
+ [2m160[0m |         p.name.toLowerCase() === filters.platform ||
+ [2m161[0m |         (filters.platform === "ios" && p.name === "iOS"))
+ [2m162[0m |     : allPlatforms;
+ [2m163[0m | 
+ [2m164[0m |   const total = filtered.reduce((s, p) => s + p.rawValue, 0);
+ [2m165[0m |   return filtered.map((p, i) => ({
+ [2m166[0m |     name: p.name, value: p.rawValue, color: CHART_COLORS[i % CHART_COLORS.length],
+ [2m167[0m |     percentage: total > 0 ? parseFloat(((p.rawValue / total) * 100).toFixed(1)) : 0,
+ [2m168[0m |   }));
+ [2m169[0m | }
+ [2m170[0m | 
+ [2m171[0m | // Static fallbacks (backward-compat if needed)
+ [2m172[0m | export const revenueByRegion: BreakdownItem[] = generateRevenueByRegion();
+ [2m173[0m | export const revenueByTier: BreakdownItem[] = generateRevenueByTier();
+ [2m174[0m | export const trafficByPlatform: BreakdownItem[] = generateTrafficByPlatform();
+ [2m175[0m | 
+ [2m176[0m | export const conversionFunnel: FunnelStep[] = [
+ [2m177[0m |   { name: "Visited Site", value: 48250, percentage: 100, dropOff: 0 },
+ [2m178[0m |   { name: "Signed Up", value: 12840, percentage: 26.6, dropOff: 73.4 },
+ [2m179[0m |   { name: "Activated", value: 8150, percentage: 16.9, dropOff: 36.5 },
+ [2m180[0m |   { name: "Started Trial", value: 4320, percentage: 9.0, dropOff: 47.0 },
+ [2m181[0m |   { name: "Purchased", value: 1830, percentage: 3.8, dropOff: 57.6 },
+ [2m182[0m | ];
+ [2m183[0m | 
+ [2m184[0m | // ─── Table Data Generator ─────────────────────────────────────
+ [2m185[0m | const regions = ["North America", "Europe", "Asia Pacific", "Latin America", "Middle East"];
+ [2m186[0m | const platforms = ["Web", "iOS", "Android"];
+ [2m187[0m | const tiers = ["Free", "Pro", "Enterprise"];
+ [2m188[0m | const campaigns = ["Organic", "Summer Sale", "Black Friday", "Referral", "Social Media"];
+ [2m189[0m | 
+ [2m190[0m | const regionValueMap: Record<string, string> = {
+     : [33;1m      ^^^^^^^|^^^^^^[0m
+     :              [33;1m`-- [33;1m`regionValueMap` redefined here[0m[0m
+ [2m191[0m |   na: "North America", eu: "Europe", apac: "Asia Pacific", latam: "Latin America", mea: "Middle East",
+ [2m192[0m | };
+     `----
+
+Import trace for requested module:
+./src/lib/mock-data.ts
+./src/app/(dashboard)/executive/page.tsx
+ ⨯ ./src/lib/mock-data.ts
+Error: 
+  [31mx[0m Expression expected
+     ,-[[36;1;4mC:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\src\lib\mock-data.ts[0m:223:1]
+ [2m223[0m |   }
+ [2m224[0m |   return result.sort((a, b) => (b.date as string).localeCompare(a.date as string));
+ [2m225[0m | }
+ [2m226[0m |     });
+     : [31;1m    ^[0m
+ [2m227[0m |   }
+ [2m228[0m |   let result = data;
+ [2m229[0m |   if (filters?.region && filters.region !== "all") {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/lib/mock-data.ts
+./src/app/(dashboard)/executive/page.tsx
+ ✓ Compiled in 3.8s (11455 modules)
+ ✓ Compiled in 551ms (5733 modules)
+ ✓ Compiled in 1172ms (5733 modules)
+ ✓ Compiled in 1334ms (5733 modules)
+ ✓ Compiled in 727ms (5733 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 1268ms (11455 modules)
+ ⨯ src\app\(dashboard)\product\page.tsx (51:17) @ trafficByPlatform
+ ⨯ ReferenceError: trafficByPlatform is not defined
+    at ProductDashboard (product/page.tsx:86:31)
+digest: "662732743"
+[0m [90m 49 |[39m         [33m<[39m[33mDonutChartWidget[39m[0m
+[0m [90m 50 |[39m           title[33m=[39m[32m"Traffic by Platform"[39m[0m
+[0m[31m[1m>[22m[39m[90m 51 |[39m           data[33m=[39m{trafficByPlatform}[0m
+[0m [90m    |[39m                 [31m[1m^[22m[39m[0m
+[0m [90m 52 |[39m           centerLabel[33m=[39m[32m"38.4K"[39m[0m
+[0m [90m 53 |[39m           isLoading[33m=[39m{isLoading}[0m
+[0m [90m 54 |[39m           activeFilterName[33m=[39m{platform}[0m
+ GET /product 500 in 1507ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 2.3s (11455 modules)
+ GET /product 200 in 1748ms
+ ⨯ src\app\(dashboard)\product\page.tsx (52:17) @ trafficByPlatform
+ ⨯ ReferenceError: trafficByPlatform is not defined
+    at ProductDashboard (product/page.tsx:99:31)
+digest: "1273898665"
+[0m [90m 50 |[39m         [33m<[39m[33mDonutChartWidget[39m[0m
+[0m [90m 51 |[39m           title[33m=[39m[32m"Traffic by Platform"[39m[0m
+[0m[31m[1m>[22m[39m[90m 52 |[39m           data[33m=[39m{trafficByPlatform}[0m
+[0m [90m    |[39m                 [31m[1m^[22m[39m[0m
+[0m [90m 53 |[39m           centerLabel[33m=[39m[32m"38.4K"[39m[0m
+[0m [90m 54 |[39m           isLoading[33m=[39m{isLoading}[0m
+[0m [90m 55 |[39m           activeFilterName[33m=[39m{platform}[0m
+ ⨯ src\app\(dashboard)\product\page.tsx (52:17) @ trafficByPlatform
+ ⨯ ReferenceError: trafficByPlatform is not defined
+    at ProductDashboard (product/page.tsx:99:31)
+digest: "1273898665"
+[0m [90m 50 |[39m         [33m<[39m[33mDonutChartWidget[39m[0m
+[0m [90m 51 |[39m           title[33m=[39m[32m"Traffic by Platform"[39m[0m
+[0m[31m[1m>[22m[39m[90m 52 |[39m           data[33m=[39m{trafficByPlatform}[0m
+[0m [90m    |[39m                 [31m[1m^[22m[39m[0m
+[0m [90m 53 |[39m           centerLabel[33m=[39m[32m"38.4K"[39m[0m
+[0m [90m 54 |[39m           isLoading[33m=[39m{isLoading}[0m
+[0m [90m 55 |[39m           activeFilterName[33m=[39m{platform}[0m
+ GET /product 500 in 450ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 2.2s (11455 modules)
+ GET /product 200 in 943ms
+ ✓ Compiled in 1112ms (11455 modules)
+ ✓ Compiled in 2.7s (11455 modules)
+ ✓ Compiled in 1323ms (11455 modules)
+ ✓ Compiled in 1515ms (11455 modules)
+ GET /product 200 in 255ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.1s (11444 modules)
+ GET /_next/static/css/app/layout.css?v=1787604678242 404 in 2191ms
+ GET /_next/static/chunks/main-app.js?v=1787604678242 404 in 2172ms
+ GET /_next/static/chunks/webpack.js?v=1787604678242 404 in 2188ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 2172ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 2172ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 2172ms
+ GET /product 200 in 203ms
+ GET /_next/static/css/app/layout.css?v=1787604682197 404 in 24ms
+ GET /_next/static/chunks/main-app.js?v=1787604682197 404 in 35ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 35ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 33ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 31ms
+ GET /product 200 in 70ms
+ GET /_next/static/css/app/layout.css?v=1787604682934 404 in 31ms
+ GET /_next/static/chunks/main-app.js?v=1787604682934 404 in 31ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 30ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 30ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 30ms
+ GET /product 200 in 73ms
+ GET /_next/static/css/app/layout.css?v=1787604683433 404 in 23ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 30ms
+ GET /_next/static/chunks/main-app.js?v=1787604683433 404 in 32ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 31ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 29ms
+ GET /product 200 in 63ms
+ GET /_next/static/css/app/layout.css?v=1787604683855 404 in 27ms
+ GET /_next/static/chunks/main-app.js?v=1787604683855 404 in 33ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 33ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 32ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 31ms
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ⨯ src\app\layout.tsx
+`next/font` error:
+Unknown font `Geist`
+ ✓ Compiled in 2.9s (11455 modules)
+ ✓ Compiled in 1450ms (11455 modules)
+ ✓ Compiled in 1377ms (5733 modules)
+ ✓ Compiled in 717ms (5733 modules)
+ ✓ Compiled in 589ms (5733 modules)
+ ✓ Compiled in 606ms (5733 modules)
+ ✓ Compiled in 597ms (5733 modules)
+ ✓ Compiled in 649ms (5733 modules)
+ ✓ Compiled in 542ms (5733 modules)
+ ✓ Compiled in 3.8s (11455 modules)
+ ✓ Compiled in 1405ms (11455 modules)
+ ✓ Compiled in 1115ms (11455 modules)
+ ✓ Compiled in 3.1s (11455 modules)
+ ✓ Compiled in 1590ms (11455 modules)
+ ✓ Compiled in 1673ms (11455 modules)
+ ✓ Compiled in 1239ms (11455 modules)
+ ✓ Compiled in 1540ms (11455 modules)
+ ✓ Compiled in 1864ms (11455 modules)
+ ✓ Compiled in 1379ms (11455 modules)
+ ✓ Compiled in 1191ms (11455 modules)
+ ✓ Compiled in 1079ms (11455 modules)
+ ✓ Compiled in 3s (11455 modules)
+ GET /product 200 in 226ms
+ ○ Compiling /exports ...
+ ✓ Compiled /exports in 2.2s (5726 modules)
+ ✓ Compiled in 1308ms (5721 modules)
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\operations\page.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-middleware.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-reloader-webpack.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1517:15)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:55:36
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+    at Module._load (node:internal/modules/cjs/loader:1294:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at __webpack_require__.f.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:198:28)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:162:22)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\operations\page.js:1:5171
+    at Object.<anonymous> (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\operations\page.js:1:5235)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at requirePage (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js:109:84)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:103:84
+    at async loadComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:103:26)
+    at async DevServer.findPageComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:714:36)
+    at async DevServer.findPageComponents (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:577:20)
+    at async DevServer.renderPageComponent (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:1910:24)
+    at async DevServer.renderToResponseImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:179:21)
+    at async handleRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:359:24)
+    at async requestHandlerImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:383:13)
+    at async Server.requestListener (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\webpack-runtime.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\app\\(dashboard)\\operations\\page.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-server.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\start-server.js'
+  ],
+  page: '/operations'
+}
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\operations\page.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-middleware.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-reloader-webpack.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1517:15)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:55:36
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+    at Module._load (node:internal/modules/cjs/loader:1294:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at __webpack_require__.f.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:198:28)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:162:22)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\alerts\page.js:9:12578
+    at Object.<anonymous> (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\alerts\page.js:9:12634)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at requirePage (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js:109:84)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:103:84
+    at async loadComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:103:26)
+    at async DevServer.findPageComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:714:36)
+    at async DevServer.findPageComponents (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:577:20)
+    at async DevServer.renderPageComponent (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:1910:24)
+    at async DevServer.renderToResponseImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:179:21)
+    at async handleRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:359:24)
+    at async requestHandlerImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:383:13)
+    at async Server.requestListener (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\webpack-runtime.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\app\\(dashboard)\\operations\\page.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-server.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\start-server.js'
+  ],
+  page: '/alerts'
+}
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\operations\page.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-middleware.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-reloader-webpack.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1517:15)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:55:36
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+    at Module._load (node:internal/modules/cjs/loader:1294:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at __webpack_require__.f.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:198:28)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:162:22)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\analyst\page.js:1:5493
+    at Object.<anonymous> (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\analyst\page.js:1:5557)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at requirePage (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js:109:84)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:103:84
+    at async loadComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:103:26)
+    at async DevServer.findPageComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:714:36)
+    at async DevServer.findPageComponents (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:577:20)
+    at async DevServer.renderPageComponent (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:1910:24)
+    at async DevServer.renderToResponseImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:1962:32)
+    at async DevServer.pipeImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:922:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:272:17)
+    at async DevServer.handleRequestImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\base-server.js:818:17)
+    at async C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:339:20
+    at async Span.traceAsyncFn (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\trace\trace.js:154:20)
+    at async DevServer.handleRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
+    at async invokeRender (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:179:21)
+    at async handleRequest (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:359:24)
+    at async requestHandlerImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js:383:13)
+    at async Server.requestListener (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\webpack-runtime.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\app\\(dashboard)\\operations\\page.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-server.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\start-server.js'
+  ],
+  page: '/analyst'
+}
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3s (11681 modules)
+ ○ Compiling /audit ...
+ ✓ Compiled /audit in 946ms (5776 modules)
+ GET /_next/static/chunks/app-pages-internals.js 404 in 66ms
+ GET /_next/static/chunks/app/(dashboard)/settings/page.js 404 in 66ms
+ GET /settings 200 in 145ms
+ GET /_next/static/css/app/layout.css?v=1787606536166 404 in 28ms
+ GET /_next/static/chunks/main-app.js?v=1787606536166 404 in 38ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 37ms
+ GET /_next/static/chunks/app/(dashboard)/settings/page.js 404 in 35ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 34ms
+ GET /product 200 in 164ms
+ GET /_next/static/css/app/layout.css?v=1787606538390 404 in 47ms
+ GET /_next/static/chunks/main-app.js?v=1787606538390 404 in 46ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 46ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 46ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 46ms
+ GET /product 200 in 69ms
+ GET /_next/static/css/app/layout.css?v=1787606539550 404 in 20ms
+ GET /_next/static/chunks/main-app.js?v=1787606539550 404 in 29ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 28ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 28ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 26ms
+ GET /product 200 in 78ms
+ GET /_next/static/css/app/layout.css?v=1787606540090 404 in 54ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 53ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 53ms
+ GET /_next/static/chunks/main-app.js?v=1787606540090 404 in 55ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 54ms
+ GET /product 200 in 77ms
+ GET /_next/static/css/app/layout.css?v=1787606540548 404 in 30ms
+ GET /_next/static/chunks/main-app.js?v=1787606540548 404 in 41ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 41ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 40ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 39ms
+ GET /product 200 in 72ms
+ GET /_next/static/css/app/layout.css?v=1787606540988 404 in 28ms
+ GET /_next/static/chunks/main-app.js?v=1787606540988 404 in 33ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 32ms
+ GET /_next/static/chunks/app/(dashboard)/product/page.js 404 in 34ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 32ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\tiny-invariant.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/tiny-invariant' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\tiny-invariant.js', but to 'Error: Can't resolve './vendor-chunks/tiny-invariant' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/tiny-invariant (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\tiny-invariant.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/victory-vendor' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\victory-vendor.js', but to 'Error: Can't resolve './vendor-chunks/victory-vendor' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/victory-vendor (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\victory-vendor.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/@babel' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\@babel.js', but to 'Error: Can't resolve './vendor-chunks/@babel' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/@babel (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\@babel.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/internmap' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\internmap.js', but to 'Error: Can't resolve './vendor-chunks/internmap' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/internmap (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\internmap.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\(dashboard)\product\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+ ○ Compiling / ...
+ ✓ Compiled / in 900ms (5771 modules)
+ GET / 307 in 1044ms
+ ✓ Compiled /executive in 489ms (5775 modules)
+ GET /executive 200 in 747ms
+ GET /_next/static/css/app/layout.css?v=1787606581041 404 in 36ms
+ GET /_next/static/chunks/main-app.js?v=1787606581041 404 in 41ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 40ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 37ms
+ GET /_next/static/chunks/app/(dashboard)/executive/page.js 404 in 37ms
+ GET /executive 200 in 84ms
+ GET /_next/static/css/app/layout.css?v=1787606584113 404 in 26ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 36ms
+ GET /_next/static/chunks/main-app.js?v=1787606584113 404 in 38ms
+ GET /_next/static/chunks/app/(dashboard)/executive/page.js 404 in 36ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 34ms
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\tiny-invariant.js'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/tiny-invariant' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\tiny-invariant.js', but to 'Error: Can't resolve './vendor-chunks/tiny-invariant' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/tiny-invariant (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\tiny-invariant.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/victory-vendor' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\victory-vendor.js', but to 'Error: Can't resolve './vendor-chunks/victory-vendor' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/victory-vendor (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\victory-vendor.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/@babel' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\@babel.js', but to 'Error: Can't resolve './vendor-chunks/@babel' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/@babel (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\@babel.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving './vendor-chunks/internmap' in C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server for build dependencies doesn't lead to expected result 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\internmap.js', but to 'Error: Can't resolve './vendor-chunks/internmap' in 'C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ./vendor-chunks/internmap (expected C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\vendor-chunks\internmap.js)
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\app\_not-found\page.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+<w>  at file dependencies C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at file C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+<w>  at resolve commonjs C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\webpack\loaders\next-route-loader\index.js
+ ✓ Compiled in 3s (11682 modules)
+ ✓ Compiled in 1913ms (11682 modules)
+ ✓ Compiled in 1367ms (11682 modules)
+ ✓ Compiled in 1408ms (11682 modules)
+ ✓ Compiled in 1221ms (11682 modules)
+ ✓ Compiled in 2.9s (11682 modules)
+ ✓ Compiled in 2.1s (11682 modules)
+ ✓ Compiled in 2.9s (11682 modules)
+ ✓ Compiled in 1395ms (11682 modules)
+ ✓ Compiled in 2s (11682 modules)
+ ✓ Compiled in 593ms (5920 modules)
+ ✓ Compiled in 700ms (5920 modules)
+ ✓ Compiled in 6.3s (11682 modules)
+ ✓ Compiled in 2.4s (11682 modules)
+ ○ Compiling /executive ...
+ ✓ Compiled /executive in 1744ms (5766 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1313ms (11675 modules)
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1100ms (11677 modules)
+ ⨯ Error: Cannot find module './682.js'
+Require stack:
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-middleware.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-reloader-webpack.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1517:15)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:55:36
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+    at Module._load (node:internal/modules/cjs/loader:1294:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at __webpack_require__.f.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:198:28)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:162:22)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:340
+    at Object.<anonymous> (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:382)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at requirePage (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js:109:84)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:72:65
+    at async Promise.all (index 0)
+    at async loadComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:71:33)
+    at async DevServer.findPageComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:714:36) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\webpack-runtime.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\pages\\_document.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-server.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\start-server.js'
+  ]
+}
+ GET /executive 500 in 4988ms
+ ⨯ Error: Cannot find module './682.js'
+Require stack:
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-middleware.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-reloader-webpack.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1517:15)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:55:36
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+    at Module._load (node:internal/modules/cjs/loader:1294:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at __webpack_require__.f.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:198:28)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:162:22)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:340
+    at Object.<anonymous> (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:382)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at requirePage (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js:109:84)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:72:65
+    at async Promise.all (index 0)
+    at async loadComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:71:33)
+    at async DevServer.findPageComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:714:36) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\webpack-runtime.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\pages\\_document.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-server.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\start-server.js'
+  ]
+}
+ GET /executive 500 in 21ms
+ ⨯ Error: Cannot find module './682.js'
+Require stack:
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-middleware.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-reloader-webpack.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1517:15)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:55:36
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+    at Module._load (node:internal/modules/cjs/loader:1294:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at __webpack_require__.f.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:198:28)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:162:22)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:340
+    at Object.<anonymous> (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:382)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at requirePage (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js:109:84)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:72:65
+    at async Promise.all (index 0)
+    at async loadComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:71:33)
+    at async DevServer.findPageComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:714:36) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\webpack-runtime.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\pages\\_document.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-server.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\start-server.js'
+  ]
+}
+ GET /executive 500 in 14ms
+ ⨯ Error: Cannot find module './682.js'
+Require stack:
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\build\utils.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-middleware.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\dev\hot-reloader-webpack.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\lib\start-server.js
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1517:15)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:55:36
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)
+    at Module._load (node:internal/modules/cjs/loader:1294:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at __webpack_require__.f.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:198:28)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\webpack-runtime.js:162:22)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:340
+    at Object.<anonymous> (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\.next\server\pages\_document.js:1:382)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Object..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1617:12)
+    at mod.require (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require-hook.js:65:28)
+    at require (node:internal/modules/helpers:153:16)
+    at requirePage (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\require.js:109:84)
+    at C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:72:65
+    at async Promise.all (index 0)
+    at async loadComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\load-components.js:71:33)
+    at async DevServer.findPageComponentsImpl (C:\Users\ridho\Documents\obby\02 - Projects\Analytics Dashboard\apps\web\node_modules\next\dist\server\next-server.js:714:36) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\webpack-runtime.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\.next\\server\\pages\\_document.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\require.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\load-components.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\build\\utils.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\router-server.js',
+    'C:\\Users\\ridho\\Documents\\obby\\02 - Projects\\Analytics Dashboard\\apps\\web\\node_modules\\next\\dist\\server\\lib\\start-server.js'
+  ]
+}
+ GET /executive 500 in 14ms

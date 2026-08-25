@@ -1,0 +1,321 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Fonts ─────────────────────────────────────────────────── */
+/* Loaded via <link> in layout.tsx                               */
+/* Geist for UI labels / Fira Code for numeric data            */
+
+@layer base {
+  :root {
+    --font-sans: "Geist", "DM Sans", system-ui, -apple-system, sans-serif;
+    --font-mono: "Fira Code", "DM Mono", "JetBrains Mono", monospace;
+
+    /* ── Light mode surfaces ─────────────────────────────── */
+    --bg:         248 250 252;   /* #F8FAFC — off-white       */
+    --surface:    255 255 255;   /* #FFFFFF                   */
+    --surface-2:  241 245 249;   /* #F1F5F9 — slate-100       */
+    --surface-3:  226 232 240;   /* #E2E8F0 — slate-200       */
+    --border:     226 232 240;   /* #E2E8F0                   */
+    --border-2:   203 213 225;   /* #CBD5E1 — slightly more   */
+    --text:        15  23  42;   /* #0F172A — slate-900       */
+    --text-2:     100 116 139;   /* #64748B — slate-500       */
+    --text-3:     148 163 184;   /* #94A3B8 — slate-400       */
+
+    /* ── Accent: single electric blue, no purple ever ────── */
+    --accent:      59 130 246;   /* #3B82F6 — blue-500        */
+    --accent-hi:   37 99  235;   /* #2563EB — blue-600        */
+    --accent-dim:  59 130 246;   /* same, used with opacity   */
+    --accent-bg:  239 246 255;   /* #EFF6FF — blue-50         */
+
+    /* ── Sidebar — always dark regardless of page theme ─── */
+    --sidebar-bg:   8  12  22;   /* #08090E — near true black */
+    --sidebar-hover: 17 24  39;  /* #111827 — gray-900        */
+    --sidebar-border: 30 41 59;  /* #1E293B — slate-800       */
+    --sidebar-text: 71  85 105;  /* #475569 — slate-600       */
+    --sidebar-text-hi: 148 163 184; /* #94A3B8 — slate-400    */
+    --sidebar-text-active: 241 245 249; /* #F1F5F9 — slate-100 */
+    --sidebar-accent: 59 130 246; /* blue-500 for active bar  */
+
+    /* ── Semantic ─────────────────────────────────────────── */
+    --positive:  34  197  94;    /* #22C55E — green-500       */
+    --negative: 239   68  68;    /* #EF4444 — red-500         */
+    --warning:  245  158  11;    /* #F59E0B — amber-500       */
+    --info:      59  130 246;    /* same as accent            */
+
+    /* ── Timing tokens ───────────────────────────────────── */
+    --dur-fast:  100ms;
+    --dur-base:  200ms;
+    --dur-slow:  350ms;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in:  cubic-bezier(0.4, 0, 1, 1);
+    --spring:   cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .dark {
+    --bg:         4    9   20;   /* #04091A — deep navy-black */
+    --surface:   10   16  32;    /* #0A1020 — dark navy       */
+    --surface-2: 16   24  46;    /* #10182E                   */
+    --surface-3: 24   35  61;    /* #18233D                   */
+    --border:    30   42  66;    /* #1E2A42                   */
+    --border-2:  42   58  86;    /* #2A3A56                   */
+    --text:     226  232 240;    /* #E2E8F0 — slate-200       */
+    --text-2:   100  116 139;    /* #64748B — slate-500       */
+    --text-3:    71   85 105;    /* #475569 — slate-600       */
+
+    --accent:    96  165 250;    /* #60A5FA — blue-400 (softer in dark) */
+    --accent-hi: 59  130 246;    /* #3B82F6 — blue-500        */
+    --accent-bg:  7   23  55;    /* #071737 — deep blue tint  */
+
+    --positive:  74  222 128;    /* #4ADE80 — green-400       */
+    --negative: 248  113 113;    /* #F87171 — red-400         */
+    --warning:  251  191  36;    /* #FBBF24 — amber-400       */
+  }
+
+  /* ── Base resets ─────────────────────────────────────────── */
+  html {
+    @apply antialiased;
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--text));
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    transition:
+      background-color var(--dur-slow) var(--ease-out),
+      color var(--dur-slow) var(--ease-out);
+  }
+
+  /* Numeric data always tabular */
+  [data-mono], .tabular, .font-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "zero";
+  }
+
+  /* Webkit scrollbar — thin and minimal */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--border-2));
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--text-3));
+  }
+
+  /* Focus ring — accessible, blue, quiet */
+  :focus-visible {
+    outline: 2px solid rgb(var(--accent) / 0.7);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Reduced motion — mandatory, no exceptions */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ── Keyframes ───────────────────────────────────────────── */
+  @keyframes shimmer {
+    0%   { background-position: -400% 0; }
+    100% { background-position:  400% 0; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in-fast {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 0.3; transform: scale(0.9); }
+    50%       { opacity: 1;   transform: scale(1.1); }
+  }
+
+  @keyframes count-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Animation utilities ─────────────────────────────────── */
+  .animate-fade-in {
+    animation: fade-in 0.3s var(--ease-out) both;
+  }
+
+  .animate-fade-in-fast {
+    animation: fade-in-fast 0.15s var(--ease-out) both;
+  }
+
+  /* ── Skeleton shimmer ────────────────────────────────────── */
+  .skeleton {
+    background-color: rgb(var(--surface-2));
+    border-radius: 0.375rem;
+    background-image: linear-gradient(
+      105deg,
+      transparent 0%,
+      rgb(var(--surface-3) / 0.8) 40%,
+      rgb(var(--surface-3) / 0.8) 60%,
+      transparent 100%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* ── Card — minimal elevation, hairline border ───────────── */
+  /* Genjutsu rule: cards only when elevation communicates hierarchy */
+  .card {
+    background-color: rgb(var(--surface));
+    border: 1px solid rgb(var(--border));
+    border-radius: 0.5rem;
+  }
+
+  .dark .card {
+    /* Tinted shadow — blue-toned not gray */
+    box-shadow: 0 1px 3px rgba(0, 8, 32, 0.4);
+  }
+
+  /* ── Widget — card + standard dashboard padding ─────────── */
+  .widget {
+    @apply card p-5;
+    transition: box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  /* Subtle hover — data density matters, no dramatic lifts */
+  .widget:hover {
+    box-shadow: 0 0 0 1px rgb(var(--border-2));
+  }
+
+  .dark .widget:hover {
+    box-shadow:
+      0 0 0 1px rgb(var(--border-2)),
+      0 4px 16px rgba(0, 4, 20, 0.5);
+  }
+
+  /* ── KPI value typography ────────────────────────────────── */
+  /* Fira Code: precise, data-dense, no generic Inter */
+  .kpi-value {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: rgb(var(--text));
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum", "zero";
+  }
+
+  .kpi-label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--text-3));
+  }
+
+  .kpi-delta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .kpi-delta-positive { @apply kpi-delta; color: rgb(var(--positive)); }
+  .kpi-delta-negative { @apply kpi-delta; color: rgb(var(--negative)); }
+  .kpi-delta-neutral  { @apply kpi-delta; color: rgb(var(--text-3)); }
+
+  /* ── Glass surface — header and filter bar ───────────────── */
+  .glass {
+    background-color: rgb(var(--bg) / 0.88);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-bottom: 1px solid rgb(var(--border));
+  }
+
+  /* ── Sidebar utility classes ─────────────────────────────── */
+  .bg-sidebar               { background-color: rgb(var(--sidebar-bg)); }
+  .bg-sidebar-hover         { background-color: rgb(var(--sidebar-hover)); }
+  .border-sidebar           { border-color: rgb(var(--sidebar-border)); }
+  .text-sidebar-text        { color: rgb(var(--sidebar-text)); }
+  .text-sidebar-text-hi     { color: rgb(var(--sidebar-text-hi)); }
+  .text-sidebar-text-active { color: rgb(var(--sidebar-text-active)); }
+
+  /* ── Icon button ─────────────────────────────────────────── */
+  .icon-btn {
+    @apply flex h-8 w-8 items-center justify-center rounded-md
+           text-[rgb(var(--text-2))]
+           transition-all duration-[100ms]
+           hover:bg-[rgb(var(--surface-2))]
+           hover:text-[rgb(var(--text))]
+           active:scale-[0.93];
+    cursor: pointer;
+  }
+
+  /* ── Avatar initials badge ───────────────────────────────── */
+  .avatar-bg {
+    background: linear-gradient(
+      135deg,
+      rgb(var(--accent-hi)) 0%,
+      rgb(var(--accent)) 100%
+    );
+  }
+
+  /* ── Live pulse indicator ────────────────────────────────── */
+  .live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 9999px;
+    background-color: rgb(var(--positive));
+    flex-shrink: 0;
+    animation: pulse-dot 2.4s ease-in-out infinite;
+  }
+
+  /* ── Separator — hairline ────────────────────────────────── */
+  .sep { background-color: rgb(var(--border)); }
+  .sep-v { width: 1px; height: 1.25rem; @apply sep; }
+  .sep-h { height: 1px; width: 100%; @apply sep; }
+
+  /* ── Stat badge ──────────────────────────────────────────── */
+  .badge-alert {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 9999px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    background-color: rgb(var(--negative) / 0.12);
+    color: rgb(var(--negative));
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .font-code { font-family: var(--font-mono) !important; }
+
+  /* Named easing helpers */
+  .ease-spring { transition-timing-function: var(--spring); }
+}
+
+/* ── Recharts — dark-mode-aware, CSS var driven ──────────────── */
+.recharts-cartesian-grid line { stroke: rgb(var(--border) / 0.5); }
+.recharts-text               { fill: rgb(var(--text-3)); font-size: 10.5px; font-family: var(--font-mono); }
+.recharts-legend-item-text   { color: rgb(var(--text-2)) !important; font-size: 11px; }
+.recharts-tooltip-cursor     { fill: rgb(var(--surface-2) / 0.4); }
